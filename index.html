@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活助手 - 多功能管理工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header" id="mainHeader">
+            <h1 class="app-title" id="headerTitle">生活助手</h1>
+            <div class="date-display" id="dateDisplay"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Home Page -->
+            <div id="homePage" class="page active">
+                <div class="welcome-section">
+                    <h2 class="welcome-title">你好！👋</h2>
+                    <p class="welcome-subtitle">今天也要元气满满哦~</p>
+                </div>
+
+                <div class="card today-overview">
+                    <h3 class="card-title">今日概览</h3>
+                    <div class="overview-grid">
+                        <div class="overview-item" id="habitsOverview">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="overview-text">
+                                <span class="overview-number" id="habitsCompleted">0</span>
+                                <span class="overview-label">习惯打卡</span>
+                            </div>
+                        </div>
+                        <div class="overview-item" id="notesOverview">
+                            <i class="fas fa-sticky-note"></i>
+                            <div class="overview-text">
+                                <span class="overview-number" id="notesCount">0</span>
+                                <span class="overview-label">笔记</span>
+                            </div>
+                        </div>
+                        <div class="overview-item" id="anniversariesOverview">
+                            <i class="fas fa-gift"></i>
+                            <div class="overview-text">
+                                <span class="overview-number" id="upcomingAnniversaries">0</span>
+                                <span class="overview-label">纪念日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3 class="section-title">功能模块</h3>
+                    <div class="action-grid">
+                        <button class="action-card" onclick="showPage('notes')">
+                            <div class="action-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            <span class="action-label">智能记事本</span>
+                        </button>
+                        <button class="action-card" onclick="showPage('finance')">
+                            <div class="action-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <span class="action-label">财务管理</span>
+                        </button>
+                        <button class="action-card" onclick="showPage('habits')">
+                            <div class="action-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span class="action-label">习惯追踪</span>
+                        </button>
+                        <button class="action-card" onclick="showPage('learning')">
+                            <div class="action-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <span class="action-label">技能学习</span>
+                        </button>
+                        <button class="action-card" onclick="showPage('anniversaries')">
+                            <div class="action-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <span class="action-label">纪念日</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Page -->
+            <div id="notesPage" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">智能记事本</h2>
+                    <button class="add-btn" onclick="openNoteDetail()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="noteSearch" placeholder="搜索笔记..." oninput="searchNotes()">
+                </div>
+                <div class="tags-filter" id="tagsFilter"></div>
+                <div class="notes-list" id="notesList"></div>
+                <div class="empty-state" id="notesEmpty" style="display: none;">
+                    <i class="fas fa-sticky-note"></i>
+                    <p>还没有笔记，快来创建第一个吧！</p>
+                </div>
+            </div>
+
+            <!-- Note Detail Page -->
+            <div id="noteDetailPage" class="page">
+                <div class="page-header detail-header">
+                    <button class="back-btn" onclick="closeNoteDetail()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">编辑笔记</h2>
+                    <button class="add-btn" onclick="saveNoteDetail()">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+                <div class="note-detail-content">
+                    <input type="text" id="noteDetailTitle" class="note-title-input" placeholder="输入标题...">
+                    <div class="editor-toolbar">
+                        <button class="toolbar-btn" onclick="insertImage()">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <button class="toolbar-btn" onclick="addTagToNote()">
+                            <i class="fas fa-tag"></i>
+                        </button>
+                        <button class="toolbar-btn" onclick="formatText('bold')">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button class="toolbar-btn" onclick="formatText('italic')">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                    </div>
+                    <div class="note-images" id="noteImages"></div>
+                    <textarea id="noteDetailContent" class="note-content-editor" placeholder="开始写笔记..."></textarea>
+                    <div class="note-tags-editor" id="noteTagsEditor"></div>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            </div>
+
+            <!-- Finance Page -->
+            <div id="financePage" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">财务管理</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="add-btn" onclick="openCategoryModal()" title="管理分类">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="add-btn" onclick="openTransactionModal()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="balance-card">
+                    <div class="balance-item">
+                        <span class="balance-label">总收入</span>
+                        <span class="balance-amount income" id="totalIncome">¥0.00</span>
+                    </div>
+                    <div class="balance-divider"></div>
+                    <div class="balance-item">
+                        <span class="balance-label">总支出</span>
+                        <span class="balance-amount expense" id="totalExpense">¥0.00</span>
+                    </div>
+                    <div class="balance-divider"></div>
+                    <div class="balance-item">
+                        <span class="balance-label">结余</span>
+                        <span class="balance-amount" id="totalBalance">¥0.00</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">交易记录</h3>
+                    <div class="transactions-list" id="transactionsList"></div>
+                    <div class="empty-state" id="transactionsEmpty" style="display: none;">
+                        <i class="fas fa-wallet"></i>
+                        <p>还没有交易记录</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Habits Page -->
+            <div id="habitsPage" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">习惯追踪</h2>
+                    <button class="add-btn" onclick="openHabitModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="changeMonth(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="calendar-month" id="calendarMonth"></span>
+                        <button class="calendar-nav" onclick="changeMonth(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar" id="calendar"></div>
+                </div>
+
+                <div class="habits-list" id="habitsList"></div>
+                <div class="empty-state" id="habitsEmpty" style="display: none;">
+                    <i class="fas fa-chart-line"></i>
+                    <p>添加你的第一个习惯吧！</p>
+                </div>
+            </div>
+
+            <!-- Learning Page -->
+            <div id="learningPage" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">技能学习</h2>
+                    <button class="add-btn" onclick="openLearningModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="learning-list" id="learningList"></div>
+                <div class="empty-state" id="learningEmpty" style="display: none;">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p>开始你的学习之旅吧！</p>
+                </div>
+            </div>
+
+            <!-- Anniversaries Page -->
+            <div id="anniversariesPage" class="page">
+                <div class="page-header">
+                    <button class="back-btn" onclick="showPage('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2 class="page-title">纪念日提醒</h2>
+                    <button class="add-btn" onclick="openAnniversaryModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="anniversaries-list" id="anniversariesList"></div>
+                <div class="empty-state" id="anniversariesEmpty" style="display: none;">
+                    <i class="fas fa-heart"></i>
+                    <p>记录重要的日子吧！</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="showPage('home')" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </button>
+            <button class="nav-item" onclick="showPage('notes')" data-page="notes">
+                <i class="fas fa-sticky-note"></i>
+                <span>笔记</span>
+            </button>
+            <button class="nav-item" onclick="showPage('finance')" data-page="finance">
+                <i class="fas fa-wallet"></i>
+                <span>财务</span>
+            </button>
+            <button class="nav-item" onclick="showPage('habits')" data-page="habits">
+                <i class="fas fa-chart-line"></i>
+                <span>习惯</span>
+            </button>
+            <button class="nav-item" onclick="showPage('learning')" data-page="learning">
+                <i class="fas fa-graduation-cap"></i>
+                <span>学习</span>
+            </button>
+            <button class="nav-item" onclick="showPage('anniversaries')" data-page="anniversaries">
+                <i class="fas fa-heart"></i>
+                <span>纪念日</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <!-- Transaction Modal -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加记录</h3>
+                <button class="close-btn" onclick="closeTransactionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>类型</label>
+                    <div class="type-toggle">
+                        <button class="type-btn active" data-type="expense" onclick="setTransactionType('expense')">支出</button>
+                        <button class="type-btn" data-type="income" onclick="setTransactionType('income')">收入</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>金额</label>
+                    <input type="number" id="transactionAmount" placeholder="输入金额" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <div class="category-selector" id="categorySelector"></div>
+                </div>
+                <div class="form-group">
+                    <label>日期</label>
+                    <input type="date" id="transactionDate">
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <input type="text" id="transactionDescription" placeholder="添加备注">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTransactionModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveTransaction()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>分类管理</h3>
+                <button class="close-btn" onclick="closeCategoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-type="expense" onclick="switchCategoryTab('expense')">支出分类</button>
+                    <button class="tab-btn" data-type="income" onclick="switchCategoryTab('income')">收入分类</button>
+                </div>
+                <div class="category-list" id="categoryList"></div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="openAddCategoryModal()">
+                    <i class="fas fa-plus"></i> 添加分类
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal" id="addCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">添加分类</h3>
+                <button class="close-btn" onclick="closeAddCategoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>分类名称</label>
+                    <input type="text" id="categoryName" placeholder="输入分类名称">
+                </div>
+                <div class="form-group">
+                    <label>选择图标</label>
+                    <div class="icon-selector" id="categoryIconSelector"></div>
+                </div>
+                <div class="form-group">
+                    <label>选择颜色</label>
+                    <div class="color-selector" id="categoryColorSelector"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddCategoryModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCategory()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Habit Modal -->
+    <div class="modal" id="habitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="habitModalTitle">新建习惯</h3>
+                <button class="close-btn" onclick="closeHabitModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="habitId">
+                <div class="form-group">
+                    <label>习惯名称</label>
+                    <input type="text" id="habitName" placeholder="例如：每天阅读30分钟">
+                </div>
+                <div class="form-group">
+                    <label>选择图标</label>
+                    <div class="icon-selector" id="habitIconSelector"></div>
+                </div>
+                <div class="form-group">
+                    <label>选择颜色</label>
+                    <div class="color-selector" id="habitColorSelector"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeHabitModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveHabit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Modal -->
+    <div class="modal" id="learningModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="learningModalTitle">新建学习计划</h3>
+                <button class="close-btn" onclick="closeLearningModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>技能名称</label>
+                    <input type="text" id="learningTitle" placeholder="例如：学习Python">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="learningDescription" placeholder="描述你的学习目标..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>目标时长（小时）</label>
+                    <input type="number" id="learningTargetHours" placeholder="输入目标时长">
+                </div>
+                <div class="form-group">
+                    <label>开始日期</label>
+                    <input type="date" id="learningStartDate">
+                </div>
+                <div class="form-group">
+                    <label>结束日期</label>
+                    <input type="date" id="learningEndDate">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeLearningModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveLearning()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Session Modal -->
+    <div class="modal" id="sessionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>记录学习</h3>
+                <button class="close-btn" onclick="closeSessionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sessionPlanId">
+                <div class="form-group">
+                    <label>学习时长（分钟）</label>
+                    <input type="number" id="sessionDuration" placeholder="输入学习时长">
+                </div>
+                <div class="form-group">
+                    <label>学习笔记</label>
+                    <textarea id="sessionNotes" placeholder="记录今天学习了什么..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSessionModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveSession()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anniversary Modal -->
+    <div class="modal" id="anniversaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="anniversaryModalTitle">新建纪念日</h3>
+                <button class="close-btn" onclick="closeAnniversaryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="anniversaryId">
+                <div class="form-group">
+                    <label>纪念日名称</label>
+                    <input type="text" id="anniversaryTitle" placeholder="例如：妈妈的生日">
+                </div>
+                <div class="form-group">
+                    <label>日期</label>
+                    <input type="date" id="anniversaryDate">
+                </div>
+                <div class="form-group">
+                    <label>类型</label>
+                    <select id="anniversaryType">
+                        <option value="birthday">生日</option>
+                        <option value="anniversary">纪念日</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>提前提醒天数</label>
+                    <input type="number" id="anniversaryRemindDays" placeholder="输入提前提醒天数" value="3">
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea id="anniversaryNote" placeholder="添加备注..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAnniversaryModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveAnniversary()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
