@@ -564,6 +564,7 @@ body {
     display: flex;
     align-items: center;
     padding: 16px;
+    padding-right: 90px;
     background: #f6f8fb;
     border-radius: 12px;
     position: relative;
@@ -618,11 +619,16 @@ body {
     color: #f5576c;
 }
 
-.transaction-delete {
+.transaction-actions {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.transaction-edit, .transaction-delete {
     width: 32px;
     height: 32px;
     border: none;
@@ -631,6 +637,14 @@ body {
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.transaction-edit:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
 }
 
 .transaction-delete:hover {

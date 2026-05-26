@@ -130,9 +130,14 @@ function updateDateDisplay() {
 }
 
 // 页面导航
-function showPage(pageName) {
+function showPage(pageName, addToHistory = true) {
     console.log('切换页面到:', pageName);
     state.currentPage = pageName;
+    
+    // 添加到历史记录
+    if (addToHistory) {
+        history.pushState({ page: pageName }, '', '#' + pageName);
+    }
     
     // 隐藏所有页面
     document.querySelectorAll('.page').forEach(page => {
@@ -175,6 +180,15 @@ function showPage(pageName) {
             break;
     }
 }
+
+// 处理浏览器返回键
+window.addEventListener('popstate', function(event) {
+    if (event.state && event.state.page) {
+        showPage(event.state.page, false);
+    } else {
+        showPage('home', false);
+    }
+});
 
 // 首页
 function renderHome() {
@@ -533,9 +547,14 @@ function renderFinance() {
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+' : '-'}¥${t.amount.toFixed(2)}
                     </div>
-                    <button class="transaction-delete" onclick="deleteTransaction('${t.id}')">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="transaction-actions">
+                        <button class="transaction-edit" onclick="editTransaction('${t.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="transaction-delete" onclick="deleteTransaction('${t.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -565,20 +584,37 @@ function selectCategory(category) {
     updateCategorySelector();
 }
 
-function openTransactionModal() {
+function openTransactionModal(transactionId = null) {
     const modal = document.getElementById('transactionModal');
     if (!modal) return;
+    
+    state.editingTransactionId = transactionId;
     
     const amountEl = document.getElementById('transactionAmount');
     const dateEl = document.getElementById('transactionDate');
     const descEl = document.getElementById('transactionDescription');
+    const titleEl = document.getElementById('transactionModalTitle');
     
-    if (amountEl) amountEl.value = '';
-    if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
-    if (descEl) descEl.value = '';
-    
-    state.transactionType = 'expense';
-    state.selectedCategory = (state.categories.expense && state.categories.expense[0]) || '其他';
+    if (transactionId) {
+        // 编辑模式
+        const transaction = state.transactions.find(t => t.id === transactionId);
+        if (transaction) {
+            if (amountEl) amountEl.value = transaction.amount;
+            if (dateEl) dateEl.value = transaction.date;
+            if (descEl) descEl.value = transaction.description || '';
+            if (titleEl) titleEl.textContent = '编辑记录';
+            state.transactionType = transaction.type;
+            state.selectedCategory = transaction.category;
+        }
+    } else {
+        // 新建模式
+        if (amountEl) amountEl.value = '';
+        if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+        if (descEl) descEl.value = '';
+        if (titleEl) titleEl.textContent = '记一笔';
+        state.transactionType = 'expense';
+        state.selectedCategory = (state.categories.expense && state.categories.expense[0]) || '其他';
+    }
     
     updateTypeToggle();
     updateCategorySelector();
@@ -586,9 +622,14 @@ function openTransactionModal() {
     modal.classList.add('active');
 }
 
+function editTransaction(id) {
+    openTransactionModal(id);
+}
+
 function closeTransactionModal() {
     const modal = document.getElementById('transactionModal');
     if (modal) modal.classList.remove('active');
+    state.editingTransactionId = null;
 }
 
 function setTransactionType(type) {
@@ -626,14 +667,30 @@ function saveTransaction() {
         return;
     }
     
-    state.transactions.push({
-        id: generateId(),
-        type: state.transactionType,
-        amount,
-        category: state.selectedCategory,
-        description,
-        date
-    });
+    if (state.editingTransactionId) {
+        // 编辑模式
+        const index = state.transactions.findIndex(t => t.id === state.editingTransactionId);
+        if (index !== -1) {
+            state.transactions[index] = {
+                ...state.transactions[index],
+                type: state.transactionType,
+                amount,
+                category: state.selectedCategory,
+                description,
+                date
+            };
+        }
+    } else {
+        // 新建模式
+        state.transactions.push({
+            id: generateId(),
+            type: state.transactionType,
+            amount,
+            category: state.selectedCategory,
+            description,
+            date
+        });
+    }
     
     saveData();
     closeTransactionModal();
@@ -1454,6 +1511,9 @@ function init() {
     loadData();
     updateDateDisplay();
     
+    // 初始化历史记录
+    history.replaceState({ page: 'home' }, '', '#home');
+    
     // 延迟初始化选择器，确保DOM已加载
     setTimeout(() => {
         initIconSelectors();
@@ -1498,6 +1558,7 @@ window.setTransactionType = setTransactionType;
 window.selectCategory = selectCategory;
 window.saveTransaction = saveTransaction;
 window.deleteTransaction = deleteTransaction;
+window.editTransaction = editTransaction;
 
 window.openCategoryModal = openCategoryModal;
 window.closeCategoryModal = closeCategoryModal;
